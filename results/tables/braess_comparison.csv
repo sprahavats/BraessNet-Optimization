@@ -1,0 +1,5 @@
+extra_link,model,demand,total_travel_time,average_travel_time
+False,UE,4000.0,260000.0,65.0
+False,SO,4000.0,260000.0,65.0
+True,UE,4000.0,320000.0,80.0
+True,SO,4000.0,258750.0,64.6875
