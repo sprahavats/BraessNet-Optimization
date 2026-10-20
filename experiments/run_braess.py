@@ -5,7 +5,7 @@ import pandas as pd
 
 from src.network import create_braess_network
 from src.equilibrium import solve_assignment
-
+from src.optimization import compare_assignments
 
 def main():
     demand = 4000.0
@@ -55,6 +55,42 @@ def main():
 
     print("\nComparison:")
     print(df.to_string(index=False))
+
+    print("\nOPTIMISATION SUMMARY")
+    print("--------------------")
+
+    for extra_link in (False, True):
+        graph = create_braess_network(extra_link)
+
+        summary = compare_assignments(
+            graph,
+            demand=demand,
+        )
+
+        print(
+            f"\nExtra link: {extra_link}"
+        )
+        print(
+            f"UE average travel time: "
+            f"{summary['ue_average_travel_time']:.4f} min"
+        )
+        print(
+            f"SO average travel time: "
+            f"{summary['so_average_travel_time']:.4f} min"
+        )
+        print(
+            f"Travel-time savings: "
+            f"{summary['travel_time_savings']:.2f} vehicle-minutes"
+        )
+        print(
+            f"Savings percentage: "
+            f"{summary['savings_percentage']:.2f}%"
+        )
+        print(
+            f"Price of Anarchy: "
+            f"{summary['price_of_anarchy']:.4f}"
+        )
+
 
 
 if __name__ == "__main__":
