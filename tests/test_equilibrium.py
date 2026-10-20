@@ -69,3 +69,59 @@ def test_invalid_demand():
 
     with pytest.raises(ValueError):
         solve_assignment(graph, -100, "UE")
+
+
+def test_user_equilibrium_used_routes_have_minimum_travel_time():
+    """Used routes must have equal minimum travel time at UE."""
+    graph = create_braess_network(extra_link=True)
+    demand = 4000.0
+    result = solve_assignment(graph, demand, "UE")
+
+    active = result.route_flows > demand * 1e-7
+    used_times = result.route_times[active]
+    shortest_time = min(result.route_times)
+
+    assert len(used_times) > 0
+    assert all(
+        time == pytest.approx(shortest_time, abs=1e-4)
+        for time in used_times
+    )
+
+
+def test_system_optimum_used_routes_have_equal_marginal_cost():
+    """Used routes must have equal minimum marginal social cost at SO."""
+    graph = create_braess_network(extra_link=True)
+    demand = 4000.0
+    result = solve_assignment(graph, demand, "SO")
+
+    marginal_link_costs = {
+        (u, v): (
+            graph[u][v]["cost"].a
+            + 2.0 * graph[u][v]["cost"].b
+            * result.link_flows[(u, v)]
+        )
+        for u, v in graph.edges()
+    }
+
+    route_marginal_costs = []
+    for route in result.routes:
+        marginal_cost = sum(
+            marginal_link_costs[(u, v)]
+            for u, v in zip(route[:-1], route[1:])
+        )
+        route_marginal_costs.append(marginal_cost)
+
+    active = result.route_flows > demand * 1e-7
+    used_costs = [
+        cost
+        for cost, is_active in zip(route_marginal_costs, active)
+        if is_active
+    ]
+    shortest_cost = min(route_marginal_costs)
+
+    assert len(used_costs) > 0
+    assert all(
+        cost == pytest.approx(shortest_cost, abs=1e-4)
+        for cost in used_costs
+    )
+
