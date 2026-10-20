@@ -25,6 +25,7 @@ class AssignmentResult:
     total_travel_time: float
     average_travel_time: float
     objective_value: float
+    equilibrium_gap: float | None = None
 
 
 def solve_assignment(
@@ -135,6 +136,36 @@ def solve_assignment(
         calculate_route_times(graph, routes, link_flows)
     )
 
+    if model == "UE":
+        active = route_flows > demand * 1e-7
+
+        if np.any(active):
+            used_route_times = route_times[active]
+            shortest_used_time = np.min(used_route_times)
+
+            if np.any(
+                route_times < shortest_used_time - 1e-4
+            ):
+                raise RuntimeError(
+                    "User equilibrium validation failed: "
+                    "an available route is faster than "
+                    "a used route."
+                )
+    
+    # Wardrop equilibrium gap: UE only
+    equilibrium_gap = None
+
+    if model == "UE":
+        shortest_time = float(np.min(route_times))
+
+        equilibrium_gap = float(
+            np.dot(route_flows, route_times - shortest_time)
+        )
+
+        equilibrium_gap = max(equilibrium_gap, 0.0)
+
+
+
     total_time = float(
         np.dot(route_flows, route_times)
     )
@@ -145,6 +176,7 @@ def solve_assignment(
         routes=routes,
         route_flows=route_flows,
         link_flows=link_flows,
+        equilibrium_gap=equilibrium_gap,
         route_times=route_times,
         total_travel_time=total_time,
         average_travel_time=total_time / demand,
