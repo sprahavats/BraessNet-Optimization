@@ -60,3 +60,33 @@ def test_savings_percentage_is_consistent():
     )
 
     assert result["savings_percentage"] == pytest.approx(expected)
+def test_comparison_reports_expected_braess_results():
+    graph = create_braess_network(extra_link=True)
+
+    result = compare_assignments(graph, demand=4000.0)
+
+    assert result["ue_average_travel_time"] == pytest.approx(
+        80.0, abs=1e-4
+    )
+    assert result["so_average_travel_time"] == pytest.approx(
+        64.6875, abs=1e-4
+    )
+    assert result["price_of_anarchy"] == pytest.approx(
+        320000.0 / 258750.0, abs=1e-4
+    )
+
+
+def test_comparison_without_extra_link():
+    graph = create_braess_network(extra_link=False)
+
+    result = compare_assignments(graph, demand=4000.0)
+
+    assert result["ue_average_travel_time"] == pytest.approx(
+        65.0, abs=1e-4
+    )
+    assert result["so_average_travel_time"] == pytest.approx(
+        65.0, abs=1e-4
+    )
+    assert result["price_of_anarchy"] == pytest.approx(
+        1.0, abs=1e-7
+    )

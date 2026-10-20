@@ -66,3 +66,42 @@ def test_negative_flow_rejected():
 
     with pytest.raises(ValueError):
         link.travel_time(-100)
+def test_negative_link_parameters_rejected():
+    with pytest.raises(ValueError):
+        LinkCost(a=-1, b=0.01)
+
+    with pytest.raises(ValueError):
+        LinkCost(a=10, b=-0.01)
+
+
+@pytest.mark.parametrize(
+    ("a", "b"),
+    [
+        (float("nan"), 0.01),
+        (10, float("inf")),
+        (float("-inf"), 0.01),
+    ],
+)
+def test_nonfinite_link_parameters_rejected(a, b):
+    with pytest.raises(ValueError):
+        LinkCost(a=a, b=b)
+
+
+def test_route_flow_length_mismatch_rejected():
+    graph = create_braess_network(True)
+    routes = enumerate_routes(graph)
+
+    with pytest.raises(ValueError, match="equal lengths"):
+        calculate_link_flows(graph, routes, [1000])
+
+
+def test_nonfinite_route_flow_rejected():
+    graph = create_braess_network(True)
+    routes = enumerate_routes(graph)
+
+    with pytest.raises(ValueError):
+        calculate_link_flows(
+            graph,
+            routes,
+            [1000, float("nan"), 1000],
+        )
