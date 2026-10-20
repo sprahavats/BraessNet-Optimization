@@ -411,7 +411,7 @@ python -m experiments.link_sensitivity
 pytest -v
 ```
 
-The current development checkpoint has **17 passing tests**. Re-running the test suite is recommended after any changes to the network, objective functions, solver configuration, or experiment scripts.
+The current development checkpoint has **27 passing tests**. Re-running the test suite is recommended after any changes to the network, objective functions, solver configuration, or experiment scripts.
 
 For reproducible numerical comparisons, record the Python and dependency versions used, preserve the experiment configuration, and regenerate result tables and figures from the scripts rather than editing generated results manually.
 
